@@ -19,7 +19,6 @@ import HELPERS from "@/utils/helpers";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const fetchOrdinals = async (address: string): Promise<OrdinalsResponse> => {
-  console.log({ address });
   const { data } = await axios.get<OrdinalsResponse>(
     `https://api-3.xverse.app/v1/address/${address}/ordinal-utxo`
   );

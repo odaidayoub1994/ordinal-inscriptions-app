@@ -26,8 +26,6 @@ const fetchInscription = async (
     `https://api-3.xverse.app/v1/address/${address}/ordinals/inscriptions/${id}`
   );
 
-  console.log({ data });
-
   return data;
 };
 
@@ -40,8 +38,6 @@ export default function InscriptionDetail({
   const searchParams = useSearchParams();
   const { id } = params;
   const address = searchParams.get("address");
-
-  console.log({ id, address });
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["inscription", { address, id }],
