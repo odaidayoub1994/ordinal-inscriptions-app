@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -16,6 +16,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Image from "next/image";
 import { Inscription } from "@/types/types";
+import { useState, useEffect } from "react";
 
 const fetchInscription = async (
   address: string,
@@ -24,6 +25,8 @@ const fetchInscription = async (
   const { data } = await axios.get(
     `https://api-3.xverse.app/v1/address/${address}/ordinals/inscriptions/${id}`
   );
+
+  console.log({ data });
 
   return data;
 };
@@ -34,29 +37,54 @@ export default function InscriptionDetail({
   params: { id: string };
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { id } = params;
-  const address =
-    "bc1pe6y27ey6gzh6p0j250kz23zra7xn89703pvmtzx239zzstg47j3s3vdvvs"; // Replace with dynamic address if needed
+  const address = searchParams.get("address");
+
+  console.log({ id, address });
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["inscription", { address, id }],
-    queryFn: () => fetchInscription(address, id),
+    queryFn: () => fetchInscription(address as string, id),
     enabled: !!id && !!address
   });
 
+  const [isValidImage, setIsValidImage] = useState(false);
+
+  useEffect(() => {
+    const validateImage = async () => {
+      try {
+        const response = await fetch(`https://ord.xverse.app/content/${id}`, {
+          method: "HEAD"
+        });
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.startsWith("image/")) {
+          setIsValidImage(true);
+        } else {
+          setIsValidImage(false);
+        }
+      } catch (error) {
+        setIsValidImage(false);
+      }
+    };
+
+    if (data?.content_type.includes("image")) {
+      validateImage();
+    }
+  }, [data, id]);
+
   if (isLoading) return <CircularProgress />;
   if (error) return <p>Error loading data</p>;
-
-  const contentUrl = `https://ord.xverse.app/content/${id}`;
 
   return (
     <Container
       sx={{
         position: "relative",
-        width: "375px",
-        height: "1198px",
+        maxWidth: "375px",
         backgroundColor: "#1A1A1A",
-        padding: "16px"
+        padding: "16px",
+        color: "#fff",
+        borderRadius: "8px"
       }}
     >
       <Button
@@ -72,7 +100,6 @@ export default function InscriptionDetail({
         gutterBottom
         sx={{
           width: "100%",
-          height: "88px",
           backgroundColor: "#1A1A1A",
           color: "#FFFFFF",
           display: "flex",
@@ -81,18 +108,21 @@ export default function InscriptionDetail({
           fontFamily: "Montserrat, sans-serif",
           fontWeight: 600,
           fontSize: "16px",
-          lineHeight: "22px"
+          lineHeight: "22px",
+          borderBottom: "1px solid #333",
+          padding: "16px 0"
         }}
       >
         Details
       </Typography>
       <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-        {data?.content_type.includes("image") ? (
+        {isValidImage ? (
           <Image
-            src={contentUrl}
+            src={`https://ord.xverse.app/content/${id}`}
             alt="Inscription content"
-            width={500}
-            height={500}
+            width={250}
+            height={250}
+            style={{ borderRadius: "8px" }}
           />
         ) : (
           <Typography
@@ -110,117 +140,63 @@ export default function InscriptionDetail({
           fontWeight: 600,
           fontSize: "16px",
           lineHeight: "22px",
-          color: "#FFFFFF"
+          color: "#FFFFFF",
+          padding: "8px 0",
+          borderBottom: "1px solid #333"
         }}
       >
-        Inscription {data?.id}
+        Inscription {data?.number}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          fontSize: "14px",
+          lineHeight: "20px",
+          color: "#FFFFFF",
+          padding: "8px 0"
+        }}
+      >
+        Inscription ID {data?.id}
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          fontSize: "14px",
+          lineHeight: "20px",
+          color: "#FFFFFF",
+          padding: "8px 0"
+        }}
+      >
+        Owner Address {data?.address}
+      </Typography>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{
+          fontFamily: "Montserrat, sans-serif",
+          fontWeight: 600,
+          fontSize: "16px",
+          lineHeight: "22px",
+          color: "#FFFFFF",
+          padding: "8px 0",
+          borderBottom: "1px solid #333"
+        }}
+      >
+        Attributes
       </Typography>
       <List>
         <ListItem>
           <ListItemText
+            primary="Output Value"
+            secondary={data?.value}
+            sx={{ color: "#FFFFFF" }}
+          />
+        </ListItem>
+        <ListItem>
+          <ListItemText
             primary="Content Type"
-            secondary={data?.content_type}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Offset"
-            secondary={data?.offset}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Address"
-            secondary={data?.address}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Address"
-            secondary={data?.genesis_address}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Block Height"
-            secondary={data?.genesis_block_height}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Block Hash"
-            secondary={data?.genesis_block_hash}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Transaction ID"
-            secondary={data?.genesis_tx_id}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Fee"
-            secondary={data?.genesis_fee}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Genesis Timestamp"
-            secondary={
-              data?.genesis_timestamp
-                ? new Date(data.genesis_timestamp).toLocaleString()
-                : "N/A"
-            }
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Location"
-            secondary={data?.location}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Output"
-            secondary={data?.output}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Sat Ordinal"
-            secondary={data?.sat_ordinal}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Sat Rarity"
-            secondary={data?.sat_rarity}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Sat Coinbase Height"
-            secondary={data?.sat_coinbase_height}
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="MIME Type"
             secondary={data?.mime_type}
             sx={{ color: "#FFFFFF" }}
           />
@@ -234,26 +210,15 @@ export default function InscriptionDetail({
         </ListItem>
         <ListItem>
           <ListItemText
-            primary="Transaction ID"
-            secondary={data?.tx_id}
+            primary="Location"
+            secondary={data?.location}
             sx={{ color: "#FFFFFF" }}
           />
         </ListItem>
         <ListItem>
           <ListItemText
-            primary="Timestamp"
-            secondary={
-              data?.timestamp
-                ? new Date(data.timestamp).toLocaleString()
-                : "N/A"
-            }
-            sx={{ color: "#FFFFFF" }}
-          />
-        </ListItem>
-        <ListItem>
-          <ListItemText
-            primary="Value"
-            secondary={data?.value}
+            primary="Genesis Transaction"
+            secondary={data?.genesis_tx_id}
             sx={{ color: "#FFFFFF" }}
           />
         </ListItem>

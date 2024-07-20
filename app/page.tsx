@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -16,6 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Inscription, OrdinalsResponse } from "@/types/types";
 import HELPERS from "@/utils/helpers";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const fetchOrdinals = async (address: string): Promise<OrdinalsResponse> => {
   console.log({ address });
@@ -23,7 +24,6 @@ const fetchOrdinals = async (address: string): Promise<OrdinalsResponse> => {
     `https://api-3.xverse.app/v1/address/${address}/ordinal-utxo`
   );
 
-  console.log({ data });
   return data;
 };
 
@@ -38,9 +38,18 @@ export default function Home() {
     enabled: false
   });
 
+  useEffect(() => {
+    if (inputAddress) {
+      refetch();
+    }
+  }, [inputAddress, refetch]);
+
   const handleSearch = () => {
     setInputAddress(address);
-    refetch();
+  };
+
+  const handleItemClick = (inscriptionId: string) => {
+    router.push(`/inscription/${inscriptionId}?address=${address}`);
   };
 
   return (
@@ -48,8 +57,10 @@ export default function Home() {
       <Typography variant="h5" align="center" gutterBottom>
         Ordinal Inscription Lookup
       </Typography>
+      <Typography variant="h6" sx={{ mt: 2 }}>
+        Owner Bitcoin Address:
+      </Typography>
       <TextField
-        label="Owner Bitcoin Address"
         value={address}
         onChange={(e) => setAddress(e.target.value)}
         fullWidth
@@ -69,12 +80,14 @@ export default function Home() {
           utxo.inscriptions.map((inscription: Inscription) => (
             <ListItem
               key={inscription.id}
-              onClick={() => router.push(`/inscription/${inscription.id}`)}
+              onClick={() => handleItemClick(inscription.id)}
               className="list-item"
             >
               <ListItemText
                 primary={`Inscription ${HELPERS.textPipe(inscription.id)}`}
+                className="list-item-text"
               />
+              <ArrowForwardIosIcon className="list-item-icon" />
             </ListItem>
           ))
         )}

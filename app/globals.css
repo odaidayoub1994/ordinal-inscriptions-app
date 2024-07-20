@@ -25,6 +25,11 @@ a {
   margin: auto;
 }
 
+h5,
+h6 {
+  color: #fff;
+}
+
 .button {
   background-color: #6200ea;
   color: #fff;
@@ -33,6 +38,7 @@ a {
   border-radius: 4px;
   cursor: pointer;
   width: 100%;
+  margin-top: 16px;
 }
 
 .button:hover {
@@ -41,15 +47,20 @@ a {
 
 .input {
   width: 100%;
-  padding: 12px;
   margin-bottom: 16px;
-  border: 1px solid #fff;
-  border-radius: 4px;
   background-color: #1e1e1e;
-  color: #fff;
+  border-radius: 4px;
+}
+
+.MuiInputBase-root {
+  background-color: #1e1e1e;
+  border-radius: 4px;
 }
 
 .list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #1e1e1e;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -59,4 +70,12 @@ a {
 
 .list-item:hover {
   background-color: #333;
+}
+
+.list-item-text {
+  flex-grow: 1;
+}
+
+.list-item-icon {
+  margin-left: 8px;
 }
