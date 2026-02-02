@@ -52,11 +52,6 @@ h6 {
   border-radius: 4px;
 }
 
-.MuiInputBase-root {
-  background-color: #1e1e1e;
-  border-radius: 4px;
-}
-
 .list-item {
   display: flex;
   justify-content: space-between;
