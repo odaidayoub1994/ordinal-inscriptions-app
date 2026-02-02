@@ -9,10 +9,12 @@ const apiClient = axios.create({
 });
 
 export const fetchOrdinals = async (
-  address: string
+  address: string,
+  offset: number = 0
 ): Promise<OrdinalsResponse> => {
   const { data } = await apiClient.get<OrdinalsResponse>(
-    `/address/${address}/ordinal-utxo`
+    `/address/${address}/ordinal-utxo`,
+    { params: { offset } }
   );
   return data;
 };

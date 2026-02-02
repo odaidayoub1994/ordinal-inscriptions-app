@@ -22,7 +22,14 @@ export default function Home() {
   const [searchAddress, setSearchAddress] = useState("");
   const router = useRouter();
 
-  const { data, error, isLoading } = useOrdinals(searchAddress);
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useOrdinals(searchAddress);
 
   const handleSearch = () => {
     const trimmed = address.trim();
@@ -35,7 +42,10 @@ export default function Home() {
     router.push(`/inscription/${inscriptionId}?address=${searchAddress}`);
   };
 
-  const inscriptions = data?.results.flatMap((utxo) => utxo.inscriptions) ?? [];
+  const inscriptions =
+    data?.pages.flatMap((page) =>
+      page.results.flatMap((utxo) => utxo.inscriptions)
+    ) ?? [];
   const hasSearched = !!searchAddress;
   const isEmpty = hasSearched && !isLoading && !error && inscriptions.length === 0;
 
@@ -88,6 +98,17 @@ export default function Home() {
           </ListItem>
         ))}
       </List>
+      {hasNextPage && (
+        <Button
+          variant="outlined"
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+          fullWidth
+          sx={{ mt: 2, color: "#fff", borderColor: "#555" }}
+        >
+          {isFetchingNextPage ? "Loading..." : "Load more"}
+        </Button>
+      )}
     </Container>
   );
 }
