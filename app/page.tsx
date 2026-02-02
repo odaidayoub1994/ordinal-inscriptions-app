@@ -82,9 +82,8 @@ function HomeContent() {
   );
 
   const hasSearched = !!searchAddress;
-  const stillFetching = isLoading || isFetchingNextPage;
   const isEmpty =
-    hasSearched && !stillFetching && !error && allInscriptions.length === 0;
+    hasSearched && !isLoading && !hasNextPage && !error && allInscriptions.length === 0;
 
   return (
     <Container sx={{ py: { xs: 2, sm: 3 } }}>
@@ -115,7 +114,7 @@ function HomeContent() {
       <Typography variant="h6" sx={{ mt: 2 }}>
         Results
       </Typography>
-      {stillFetching && (
+      {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <CircularProgress />
         </Box>
