@@ -56,8 +56,10 @@ function HomeContent() {
   const inscriptions =
     data?.results.flatMap((utxo) => utxo.inscriptions) ?? [];
   const totalPages = Math.ceil((data?.total ?? 0) / (data?.limit ?? 1));
+  const totalUtxos = data?.total ?? 0;
   const hasSearched = !!searchAddress;
-  const isEmpty = hasSearched && !isLoading && !error && inscriptions.length === 0;
+  const noResults = hasSearched && !isLoading && !error && totalUtxos === 0;
+  const emptyPage = hasSearched && !isLoading && !error && totalUtxos > 0 && inscriptions.length === 0;
 
   return (
     <Container sx={{ py: { xs: 2, sm: 3 } }}>
@@ -94,9 +96,14 @@ function HomeContent() {
         </Box>
       )}
       {error && <Typography color="error">Error loading data</Typography>}
-      {isEmpty && (
+      {noResults && (
         <Typography sx={{ mt: 2 }} color="text.secondary">
           No inscriptions found for this address.
+        </Typography>
+      )}
+      {emptyPage && (
+        <Typography sx={{ mt: 2 }} color="text.secondary">
+          No inscriptions on this page.
         </Typography>
       )}
       <List>
