@@ -27,11 +27,26 @@ const sectionHeading: SxProps = {
 
 const bodyText: SxProps = {
   fontFamily: "Montserrat, sans-serif",
-  fontWeight: 600,
   fontSize: "14px",
   lineHeight: "20px",
   color: "#FFFFFF",
-  padding: "8px 0"
+  padding: "8px 0",
+  wordBreak: "break-all"
+};
+
+const labelText: SxProps = {
+  fontFamily: "Montserrat, sans-serif",
+  fontWeight: 600,
+  fontSize: "13px",
+  color: "#999",
+  marginBottom: "2px"
+};
+
+const secondarySx: SxProps = {
+  "& .MuiListItemText-secondary": {
+    color: "#aaa",
+    wordBreak: "break-all"
+  }
 };
 
 export default function InscriptionDetail({
@@ -78,45 +93,47 @@ export default function InscriptionDetail({
       <Typography variant="h6" gutterBottom sx={sectionHeading}>
         Inscription {data?.number}
       </Typography>
-      <Typography sx={bodyText}>Inscription ID {data?.id}</Typography>
-      <Typography sx={bodyText}>Owner Address {data?.address}</Typography>
-      <Typography variant="h6" gutterBottom sx={sectionHeading}>
+      <Typography sx={labelText}>Inscription ID</Typography>
+      <Typography sx={bodyText}>{data?.id}</Typography>
+      <Typography sx={labelText}>Owner Address</Typography>
+      <Typography sx={bodyText}>{data?.address}</Typography>
+      <Typography variant="h6" gutterBottom sx={{ ...sectionHeading as object, mt: 2 }}>
         Attributes
       </Typography>
-      <List>
+      <List disablePadding>
         <ListItem>
           <ListItemText
             primary="Output Value"
-            secondary={data?.value}
-            sx={{ color: "#FFFFFF" }}
+            secondary={data?.value ?? "—"}
+            sx={secondarySx}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Content Type"
-            secondary={data?.mime_type}
-            sx={{ color: "#FFFFFF" }}
+            secondary={data?.content_type || data?.mime_type || "—"}
+            sx={secondarySx}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Content Length"
-            secondary={data?.content_length}
-            sx={{ color: "#FFFFFF" }}
+            secondary={data?.content_length ?? "—"}
+            sx={secondarySx}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Location"
-            secondary={data?.location}
-            sx={{ color: "#FFFFFF" }}
+            secondary={data?.location || "—"}
+            sx={secondarySx}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Genesis Transaction"
-            secondary={data?.genesis_tx_id}
-            sx={{ color: "#FFFFFF" }}
+            secondary={data?.genesis_tx_id || "—"}
+            sx={secondarySx}
           />
         </ListItem>
       </List>
