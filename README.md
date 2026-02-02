@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Ordinal Inscriptions App
+
+A Bitcoin Ordinals lookup and exploration app. Search for inscriptions by wallet address and view detailed metadata including content previews, attributes, and genesis transaction info.
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router), React 18, TypeScript
+- **UI:** Material-UI 5, Emotion
+- **State Management:** TanStack React Query 5
+- **HTTP Client:** Axios
+- **External API:** [Xverse API](https://api-3.xverse.app)
+
+## Project Structure
+
+```
+app/
+├── layout.tsx                    # Root layout
+├── page.tsx                      # Home — address search & results
+├── providers.tsx                 # React Query provider
+├── globals.css                   # Global styles (dark theme)
+└── inscription/[id]/page.tsx     # Inscription detail view
+
+hooks/
+├── useOrdinals.ts                # Hook for fetching ordinals by address
+└── useInscription.ts             # Hooks for inscription data & image validation
+
+services/
+└── api.ts                        # Axios instance & API functions
+
+types/
+└── types.ts                      # TypeScript interfaces
+
+utils/
+└── helpers.ts                    # Text formatting utilities
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+### Lint
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Search Bitcoin Ordinal inscriptions by wallet address
+- View inscription list with truncated IDs
+- Detailed view with image preview (when content is an image)
+- Inscription metadata: number, ID, owner, output value, content type, location, genesis transaction
