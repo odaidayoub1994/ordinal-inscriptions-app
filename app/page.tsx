@@ -19,7 +19,7 @@ import { truncateText } from "@/utils/helpers";
 import { useOrdinals } from "@/hooks/useOrdinals";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 8;
 
 export default function Home() {
   return (
