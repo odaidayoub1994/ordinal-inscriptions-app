@@ -63,16 +63,7 @@ export default function InscriptionDetail({
   if (error) return <Typography color="error">Error loading data</Typography>;
 
   return (
-    <Container
-      sx={{
-        position: "relative",
-        maxWidth: "375px",
-        backgroundColor: "#1A1A1A",
-        padding: "16px",
-        color: "#fff",
-        borderRadius: "8px"
-      }}
-    >
+    <Container className="container">
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => router.back()}
