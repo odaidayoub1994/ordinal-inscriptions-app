@@ -14,9 +14,11 @@ export default function InscriptionContent({
   contentType
 }: InscriptionContentProps) {
   const contentUrl = `${CONTENT_BASE_URL}/${id}`;
+  const isHtml = contentType?.startsWith("text/html");
   const isText =
-    contentType?.startsWith("text/") ||
-    contentType === "application/json";
+    !isHtml &&
+    (contentType?.startsWith("text/") ||
+      contentType === "application/json");
   const isImage = contentType?.startsWith("image/");
 
   const { data: textContent, isLoading: isTextLoading } =
