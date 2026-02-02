@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Button,
   TextField,
@@ -11,16 +11,25 @@ import {
   Typography,
   Container
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Inscription } from "@/types/types";
 import { truncateText } from "@/utils/helpers";
 import { useOrdinals } from "@/hooks/useOrdinals";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function Home() {
-  const [address, setAddress] = useState("");
-  const [searchAddress, setSearchAddress] = useState("");
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchAddress = searchParams.get("address") ?? "";
+  const [address, setAddress] = useState(searchAddress);
 
   const {
     data,
@@ -34,7 +43,7 @@ export default function Home() {
   const handleSearch = () => {
     const trimmed = address.trim();
     if (trimmed) {
-      setSearchAddress(trimmed);
+      router.push(`/?address=${encodeURIComponent(trimmed)}`);
     }
   };
 
