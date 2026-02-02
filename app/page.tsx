@@ -9,7 +9,8 @@ import {
   ListItemText,
   CircularProgress,
   Typography,
-  Container
+  Container,
+  Box
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Inscription } from "@/types/types";
@@ -59,7 +60,7 @@ function HomeContent() {
   const isEmpty = hasSearched && !isLoading && !error && inscriptions.length === 0;
 
   return (
-    <Container className="container">
+    <Container sx={{ py: { xs: 2, sm: 3 } }}>
       <Typography variant="h5" align="center" gutterBottom>
         Ordinal Inscription Lookup
       </Typography>
@@ -72,23 +73,29 @@ function HomeContent() {
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         fullWidth
         variant="filled"
-        className="input"
+        placeholder="Enter a Bitcoin address"
+        sx={{ mb: 2 }}
       />
       <Button
         variant="contained"
-        className="button"
         onClick={handleSearch}
         disabled={!address.trim()}
+        fullWidth
+        sx={{ mt: 1 }}
       >
         Look up
       </Button>
       <Typography variant="h6" sx={{ mt: 2 }}>
         Results
       </Typography>
-      {isLoading && <CircularProgress />}
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <CircularProgress />
+        </Box>
+      )}
       {error && <Typography color="error">Error loading data</Typography>}
       {isEmpty && (
-        <Typography sx={{ mt: 2, color: "#999" }}>
+        <Typography sx={{ mt: 2 }} color="text.secondary">
           No inscriptions found for this address.
         </Typography>
       )}
@@ -97,13 +104,11 @@ function HomeContent() {
           <ListItem
             key={inscription.id}
             onClick={() => handleItemClick(inscription.id)}
-            className="list-item"
           >
             <ListItemText
               primary={`Inscription ${truncateText(inscription.id)}`}
-              className="list-item-text"
             />
-            <ArrowForwardIosIcon className="list-item-icon" />
+            <ArrowForwardIosIcon sx={{ ml: 1 }} fontSize="small" />
           </ListItem>
         ))}
       </List>
@@ -113,7 +118,7 @@ function HomeContent() {
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
           fullWidth
-          sx={{ mt: 2, color: "#fff", borderColor: "#555" }}
+          sx={{ mt: 2, color: "text.primary", borderColor: "divider" }}
         >
           {isFetchingNextPage ? "Loading..." : "Load more"}
         </Button>
