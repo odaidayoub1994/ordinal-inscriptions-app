@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
-  Button,
   TextField,
   List,
   ListItem,
@@ -10,7 +9,9 @@ import {
   CircularProgress,
   Typography,
   Container,
-  Box
+  Box,
+  Pagination,
+  Button
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Inscription } from "@/types/types";
@@ -31,15 +32,15 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const searchAddress = searchParams.get("address") ?? "";
   const [address, setAddress] = useState(searchAddress);
+  const [page, setPage] = useState(1);
 
-  const {
-    data,
-    error,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = useOrdinals(searchAddress);
+  const offset = (page - 1) * 60;
+
+  const { data, error, isLoading } = useOrdinals(searchAddress, offset);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchAddress]);
 
   const handleSearch = () => {
     const trimmed = address.trim();
@@ -53,9 +54,8 @@ function HomeContent() {
   };
 
   const inscriptions =
-    data?.pages.flatMap((page) =>
-      page.results.flatMap((utxo) => utxo.inscriptions)
-    ) ?? [];
+    data?.results.flatMap((utxo) => utxo.inscriptions) ?? [];
+  const totalPages = Math.ceil((data?.total ?? 0) / (data?.limit ?? 1));
   const hasSearched = !!searchAddress;
   const isEmpty = hasSearched && !isLoading && !error && inscriptions.length === 0;
 
@@ -112,16 +112,15 @@ function HomeContent() {
           </ListItem>
         ))}
       </List>
-      {hasNextPage && (
-        <Button
-          variant="outlined"
-          onClick={() => fetchNextPage()}
-          disabled={isFetchingNextPage}
-          fullWidth
-          sx={{ mt: 2, color: "text.primary", borderColor: "divider" }}
-        >
-          {isFetchingNextPage ? "Loading..." : "Load more"}
-        </Button>
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+          />
+        </Box>
       )}
     </Container>
   );
