@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useInscriptionContent } from "@/hooks/useInscription";
 import { CONTENT_BASE_URL } from "@/services/api";
 
@@ -33,7 +33,12 @@ export default function InscriptionContent({
         <img
           src={contentUrl}
           alt="Inscription content"
-          style={{ maxWidth: 250, maxHeight: 250, borderRadius: "8px" }}
+          style={{
+            maxWidth: "100%",
+            width: 350,
+            height: "auto",
+            borderRadius: "8px"
+          }}
         />
       </Box>
     );
@@ -45,7 +50,7 @@ export default function InscriptionContent({
       <Box
         sx={{
           mb: 2,
-          backgroundColor: "#111",
+          bgcolor: "background.default",
           borderRadius: "8px",
           padding: "12px",
           overflow: "auto",
@@ -76,8 +81,9 @@ export default function InscriptionContent({
         title="Inscription content"
         sandbox="allow-scripts"
         style={{
-          width: 250,
-          height: 250,
+          width: "100%",
+          maxWidth: 350,
+          aspectRatio: "1/1",
           border: "none",
           borderRadius: "8px",
           backgroundColor: "#000"
