@@ -8,46 +8,12 @@ import {
   Button,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Box
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useInscription } from "@/hooks/useInscription";
-import { SxProps } from "@mui/material/styles";
 import InscriptionContent from "./InscriptionContent";
-
-const sectionHeading: SxProps = {
-  fontFamily: "Montserrat, sans-serif",
-  fontWeight: 600,
-  fontSize: "16px",
-  lineHeight: "22px",
-  color: "#FFFFFF",
-  padding: "8px 0",
-  borderBottom: "1px solid #333"
-};
-
-const bodyText: SxProps = {
-  fontFamily: "Montserrat, sans-serif",
-  fontSize: "14px",
-  lineHeight: "20px",
-  color: "#FFFFFF",
-  padding: "8px 0",
-  wordBreak: "break-all"
-};
-
-const labelText: SxProps = {
-  fontFamily: "Montserrat, sans-serif",
-  fontWeight: 600,
-  fontSize: "13px",
-  color: "#999",
-  marginBottom: "2px"
-};
-
-const secondarySx: SxProps = {
-  "& .MuiListItemText-secondary": {
-    color: "#aaa",
-    wordBreak: "break-all"
-  }
-};
 
 export default function InscriptionDetail({
   params
@@ -63,41 +29,67 @@ export default function InscriptionDetail({
 
   if (!address) {
     return (
-      <Container sx={{ padding: "32px", textAlign: "center" }}>
+      <Container sx={{ py: 4, textAlign: "center" }}>
         <Typography color="error">
           Missing address. Please navigate from the search page.
         </Typography>
-        <Button onClick={() => router.push("/")} sx={{ color: "#fff", mt: 2 }}>
+        <Button onClick={() => router.push("/")} sx={{ mt: 2 }}>
           Go to Search
         </Button>
       </Container>
     );
   }
 
-  if (isLoading) return <CircularProgress />;
+  if (isLoading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   if (error) return <Typography color="error">Error loading data</Typography>;
 
   return (
-    <Container className="container">
+    <Container sx={{ py: { xs: 2, sm: 3 } }}>
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => router.back()}
-        sx={{ color: "#fff", mb: 2 }}
+        sx={{ mb: 2 }}
       >
         Back
       </Button>
-      <Typography variant="h5" align="center" gutterBottom sx={{ ...sectionHeading as object, padding: "16px 0" }}>
+      <Typography
+        variant="h5"
+        align="center"
+        gutterBottom
+        sx={{ py: 2, borderBottom: 1, borderColor: "divider" }}
+      >
         Details
       </Typography>
       <InscriptionContent id={id} contentType={data?.content_type} />
-      <Typography variant="h6" gutterBottom sx={sectionHeading}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ py: 1, borderBottom: 1, borderColor: "divider" }}
+      >
         Inscription {data?.number}
       </Typography>
-      <Typography sx={labelText}>Inscription ID</Typography>
-      <Typography sx={bodyText}>{data?.id}</Typography>
-      <Typography sx={labelText}>Owner Address</Typography>
-      <Typography sx={bodyText}>{data?.address}</Typography>
-      <Typography variant="h6" gutterBottom sx={{ ...sectionHeading as object, mt: 2 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+        Inscription ID
+      </Typography>
+      <Typography variant="body1" sx={{ py: 1, wordBreak: "break-all" }}>
+        {data?.id}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+        Owner Address
+      </Typography>
+      <Typography variant="body1" sx={{ py: 1, wordBreak: "break-all" }}>
+        {data?.address}
+      </Typography>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ mt: 2, py: 1, borderBottom: 1, borderColor: "divider" }}
+      >
         Attributes
       </Typography>
       <List disablePadding>
@@ -105,35 +97,35 @@ export default function InscriptionDetail({
           <ListItemText
             primary="Output Value"
             secondary={data?.value ?? "—"}
-            sx={secondarySx}
+            secondaryTypographyProps={{ color: "text.secondary", sx: { wordBreak: "break-all" } }}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Content Type"
             secondary={data?.content_type || data?.mime_type || "—"}
-            sx={secondarySx}
+            secondaryTypographyProps={{ color: "text.secondary", sx: { wordBreak: "break-all" } }}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Content Length"
             secondary={data?.content_length ?? "—"}
-            sx={secondarySx}
+            secondaryTypographyProps={{ color: "text.secondary", sx: { wordBreak: "break-all" } }}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Location"
             secondary={data?.location || "—"}
-            sx={secondarySx}
+            secondaryTypographyProps={{ color: "text.secondary", sx: { wordBreak: "break-all" } }}
           />
         </ListItem>
         <ListItem>
           <ListItemText
             primary="Genesis Transaction"
             secondary={data?.genesis_tx_id || "—"}
-            sx={secondarySx}
+            secondaryTypographyProps={{ color: "text.secondary", sx: { wordBreak: "break-all" } }}
           />
         </ListItem>
       </List>
