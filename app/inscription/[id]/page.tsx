@@ -2,7 +2,6 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Box,
   CircularProgress,
   Typography,
   Container,
@@ -12,10 +11,9 @@ import {
   ListItemText
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Image from "next/image";
-import { useInscription, useImageValidation } from "@/hooks/useInscription";
-import { CONTENT_BASE_URL } from "@/services/api";
+import { useInscription } from "@/hooks/useInscription";
 import { SxProps } from "@mui/material/styles";
+import InscriptionContent from "./InscriptionContent";
 
 const sectionHeading: SxProps = {
   fontFamily: "Montserrat, sans-serif",
@@ -47,10 +45,6 @@ export default function InscriptionDetail({
   const address = searchParams.get("address");
 
   const { data, error, isLoading } = useInscription(address, id);
-  const { data: isValidImage = false } = useImageValidation(
-    id,
-    data?.content_type
-  );
 
   if (!address) {
     return (
@@ -89,21 +83,7 @@ export default function InscriptionDetail({
       <Typography variant="h5" align="center" gutterBottom sx={{ ...sectionHeading as object, padding: "16px 0" }}>
         Details
       </Typography>
-      <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-        {isValidImage ? (
-          <Image
-            src={`${CONTENT_BASE_URL}/${id}`}
-            alt="Inscription content"
-            width={250}
-            height={250}
-            style={{ borderRadius: "8px" }}
-          />
-        ) : (
-          <Typography sx={bodyText}>
-            Inscription details not available
-          </Typography>
-        )}
-      </Box>
+      <InscriptionContent id={id} contentType={data?.content_type} />
       <Typography variant="h6" gutterBottom sx={sectionHeading}>
         Inscription {data?.number}
       </Typography>

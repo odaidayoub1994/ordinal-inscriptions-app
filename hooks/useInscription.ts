@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchInscription } from "@/services/api";
-import { CONTENT_BASE_URL } from "@/services/api";
+import { fetchInscription, CONTENT_BASE_URL } from "@/services/api";
 
 export function useInscription(address: string | null, id: string) {
   return useQuery({
@@ -10,16 +9,13 @@ export function useInscription(address: string | null, id: string) {
   });
 }
 
-export function useImageValidation(id: string, contentType: string | undefined) {
+export function useInscriptionContent(id: string, enabled: boolean) {
   return useQuery({
-    queryKey: ["image-validation", id],
+    queryKey: ["inscription-content", id],
     queryFn: async () => {
-      const response = await fetch(`${CONTENT_BASE_URL}/${id}`, {
-        method: "HEAD"
-      });
-      const type = response.headers.get("content-type");
-      return !!type && type.startsWith("image/");
+      const response = await fetch(`${CONTENT_BASE_URL}/${id}`);
+      return response.text();
     },
-    enabled: !!contentType && contentType.includes("image")
+    enabled
   });
 }
