@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   Button,
   TextField,
@@ -14,42 +12,32 @@ import {
   Container
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Inscription, OrdinalsResponse } from "@/types/types";
-import HELPERS from "@/utils/helpers";
+import { Inscription } from "@/types/types";
+import { truncateText } from "@/utils/helpers";
+import { useOrdinals } from "@/hooks/useOrdinals";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
-const fetchOrdinals = async (address: string): Promise<OrdinalsResponse> => {
-  const { data } = await axios.get<OrdinalsResponse>(
-    `https://api-3.xverse.app/v1/address/${address}/ordinal-utxo`
-  );
-
-  return data;
-};
 
 export default function Home() {
   const [address, setAddress] = useState("");
-  const [inputAddress, setInputAddress] = useState("");
+  const [searchAddress, setSearchAddress] = useState("");
   const router = useRouter();
 
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ["ordinals", inputAddress],
-    queryFn: () => fetchOrdinals(inputAddress),
-    enabled: false
-  });
-
-  useEffect(() => {
-    if (inputAddress) {
-      refetch();
-    }
-  }, [inputAddress, refetch]);
+  const { data, error, isLoading } = useOrdinals(searchAddress);
 
   const handleSearch = () => {
-    setInputAddress(address);
+    const trimmed = address.trim();
+    if (trimmed) {
+      setSearchAddress(trimmed);
+    }
   };
 
   const handleItemClick = (inscriptionId: string) => {
-    router.push(`/inscription/${inscriptionId}?address=${address}`);
+    router.push(`/inscription/${inscriptionId}?address=${searchAddress}`);
   };
+
+  const inscriptions = data?.results.flatMap((utxo) => utxo.inscriptions) ?? [];
+  const hasSearched = !!searchAddress;
+  const isEmpty = hasSearched && !isLoading && !error && inscriptions.length === 0;
 
   return (
     <Container className="container">
@@ -62,36 +50,44 @@ export default function Home() {
       <TextField
         value={address}
         onChange={(e) => setAddress(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         fullWidth
         variant="filled"
         className="input"
       />
-      <Button variant="contained" className="button" onClick={handleSearch}>
+      <Button
+        variant="contained"
+        className="button"
+        onClick={handleSearch}
+        disabled={!address.trim()}
+      >
         Look up
       </Button>
       <Typography variant="h6" sx={{ mt: 2 }}>
         Results
       </Typography>
       {isLoading && <CircularProgress />}
-      {error && <p>Error loading data</p>}
+      {error && <Typography color="error">Error loading data</Typography>}
+      {isEmpty && (
+        <Typography sx={{ mt: 2, color: "#999" }}>
+          No inscriptions found for this address.
+        </Typography>
+      )}
       <List>
-        {data?.results.flatMap((utxo) =>
-          utxo.inscriptions.map((inscription: Inscription) => (
-            <ListItem
-              key={inscription.id}
-              onClick={() => handleItemClick(inscription.id)}
-              className="list-item"
-            >
-              <ListItemText
-                primary={`Inscription ${HELPERS.textPipe(inscription.id)}`}
-                className="list-item-text"
-              />
-              <ArrowForwardIosIcon className="list-item-icon" />
-            </ListItem>
-          ))
-        )}
+        {inscriptions.map((inscription: Inscription) => (
+          <ListItem
+            key={inscription.id}
+            onClick={() => handleItemClick(inscription.id)}
+            className="list-item"
+          >
+            <ListItemText
+              primary={`Inscription ${truncateText(inscription.id)}`}
+              className="list-item-text"
+            />
+            <ArrowForwardIosIcon className="list-item-icon" />
+          </ListItem>
+        ))}
       </List>
-      {/* Add Load More Button for pagination */}
     </Container>
   );
 }
