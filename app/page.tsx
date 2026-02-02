@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   TextField,
   List,
@@ -19,6 +19,8 @@ import { truncateText } from "@/utils/helpers";
 import { useOrdinals } from "@/hooks/useOrdinals";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
+const PAGE_SIZE = 20;
+
 export default function Home() {
   return (
     <Suspense>
@@ -34,9 +36,21 @@ function HomeContent() {
   const [address, setAddress] = useState(searchAddress);
   const [page, setPage] = useState(1);
 
-  const offset = (page - 1) * 60;
+  const {
+    data,
+    error,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useOrdinals(searchAddress);
 
-  const { data, error, isLoading } = useOrdinals(searchAddress, offset);
+  // Fetch all UTXO pages so we have the complete inscription list
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     setPage(1);
@@ -53,13 +67,24 @@ function HomeContent() {
     router.push(`/inscription/${inscriptionId}?address=${searchAddress}`);
   };
 
-  const inscriptions =
-    data?.results.flatMap((utxo) => utxo.inscriptions) ?? [];
-  const totalPages = Math.ceil((data?.total ?? 0) / (data?.limit ?? 1));
-  const totalUtxos = data?.total ?? 0;
+  const allInscriptions = useMemo(
+    () =>
+      data?.pages.flatMap((p) =>
+        p.results.flatMap((utxo) => utxo.inscriptions)
+      ) ?? [],
+    [data]
+  );
+
+  const totalPages = Math.ceil(allInscriptions.length / PAGE_SIZE);
+  const paginatedInscriptions = allInscriptions.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
   const hasSearched = !!searchAddress;
-  const noResults = hasSearched && !isLoading && !error && totalUtxos === 0;
-  const emptyPage = hasSearched && !isLoading && !error && totalUtxos > 0 && inscriptions.length === 0;
+  const stillFetching = isLoading || isFetchingNextPage;
+  const isEmpty =
+    hasSearched && !stillFetching && !error && allInscriptions.length === 0;
 
   return (
     <Container sx={{ py: { xs: 2, sm: 3 } }}>
@@ -90,24 +115,19 @@ function HomeContent() {
       <Typography variant="h6" sx={{ mt: 2 }}>
         Results
       </Typography>
-      {isLoading && (
+      {stillFetching && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <CircularProgress />
         </Box>
       )}
       {error && <Typography color="error">Error loading data</Typography>}
-      {noResults && (
+      {isEmpty && (
         <Typography sx={{ mt: 2 }} color="text.secondary">
           No inscriptions found for this address.
         </Typography>
       )}
-      {emptyPage && (
-        <Typography sx={{ mt: 2 }} color="text.secondary">
-          No inscriptions on this page.
-        </Typography>
-      )}
       <List>
-        {inscriptions.map((inscription: Inscription) => (
+        {paginatedInscriptions.map((inscription: Inscription) => (
           <ListItem
             key={inscription.id}
             onClick={() => handleItemClick(inscription.id)}
