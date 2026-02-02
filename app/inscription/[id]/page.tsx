@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   CircularProgress,
@@ -15,18 +13,27 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Image from "next/image";
-import { Inscription } from "@/types/types";
-import { useState, useEffect } from "react";
+import { useInscription, useImageValidation } from "@/hooks/useInscription";
+import { CONTENT_BASE_URL } from "@/services/api";
+import { SxProps } from "@mui/material/styles";
 
-const fetchInscription = async (
-  address: string,
-  id: string
-): Promise<Inscription> => {
-  const { data } = await axios.get(
-    `https://api-3.xverse.app/v1/address/${address}/ordinals/inscriptions/${id}`
-  );
+const sectionHeading: SxProps = {
+  fontFamily: "Montserrat, sans-serif",
+  fontWeight: 600,
+  fontSize: "16px",
+  lineHeight: "22px",
+  color: "#FFFFFF",
+  padding: "8px 0",
+  borderBottom: "1px solid #333"
+};
 
-  return data;
+const bodyText: SxProps = {
+  fontFamily: "Montserrat, sans-serif",
+  fontWeight: 600,
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#FFFFFF",
+  padding: "8px 0"
 };
 
 export default function InscriptionDetail({
@@ -39,38 +46,27 @@ export default function InscriptionDetail({
   const { id } = params;
   const address = searchParams.get("address");
 
-  const { data, error, isLoading } = useQuery({
-    queryKey: ["inscription", { address, id }],
-    queryFn: () => fetchInscription(address as string, id),
-    enabled: !!id && !!address
-  });
+  const { data, error, isLoading } = useInscription(address, id);
+  const { data: isValidImage = false } = useImageValidation(
+    id,
+    data?.content_type
+  );
 
-  const [isValidImage, setIsValidImage] = useState(false);
-
-  useEffect(() => {
-    const validateImage = async () => {
-      try {
-        const response = await fetch(`https://ord.xverse.app/content/${id}`, {
-          method: "HEAD"
-        });
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.startsWith("image/")) {
-          setIsValidImage(true);
-        } else {
-          setIsValidImage(false);
-        }
-      } catch (error) {
-        setIsValidImage(false);
-      }
-    };
-
-    if (data?.content_type.includes("image")) {
-      validateImage();
-    }
-  }, [data, id]);
+  if (!address) {
+    return (
+      <Container sx={{ padding: "32px", textAlign: "center" }}>
+        <Typography color="error">
+          Missing address. Please navigate from the search page.
+        </Typography>
+        <Button onClick={() => router.push("/")} sx={{ color: "#fff", mt: 2 }}>
+          Go to Search
+        </Button>
+      </Container>
+    );
+  }
 
   if (isLoading) return <CircularProgress />;
-  if (error) return <p>Error loading data</p>;
+  if (error) return <Typography color="error">Error loading data</Typography>;
 
   return (
     <Container
@@ -90,96 +86,30 @@ export default function InscriptionDetail({
       >
         Back
       </Button>
-      <Typography
-        variant="h5"
-        align="center"
-        gutterBottom
-        sx={{
-          width: "100%",
-          backgroundColor: "#1A1A1A",
-          color: "#FFFFFF",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: "16px",
-          lineHeight: "22px",
-          borderBottom: "1px solid #333",
-          padding: "16px 0"
-        }}
-      >
+      <Typography variant="h5" align="center" gutterBottom sx={{ ...sectionHeading as object, padding: "16px 0" }}>
         Details
       </Typography>
       <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
         {isValidImage ? (
           <Image
-            src={`https://ord.xverse.app/content/${id}`}
+            src={`${CONTENT_BASE_URL}/${id}`}
             alt="Inscription content"
             width={250}
             height={250}
             style={{ borderRadius: "8px" }}
           />
         ) : (
-          <Typography
-            sx={{ fontFamily: "Montserrat, sans-serif", color: "#FFFFFF" }}
-          >
+          <Typography sx={bodyText}>
             Inscription details not available
           </Typography>
         )}
       </Box>
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: "16px",
-          lineHeight: "22px",
-          color: "#FFFFFF",
-          padding: "8px 0",
-          borderBottom: "1px solid #333"
-        }}
-      >
+      <Typography variant="h6" gutterBottom sx={sectionHeading}>
         Inscription {data?.number}
       </Typography>
-      <Typography
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: "14px",
-          lineHeight: "20px",
-          color: "#FFFFFF",
-          padding: "8px 0"
-        }}
-      >
-        Inscription ID {data?.id}
-      </Typography>
-      <Typography
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: "14px",
-          lineHeight: "20px",
-          color: "#FFFFFF",
-          padding: "8px 0"
-        }}
-      >
-        Owner Address {data?.address}
-      </Typography>
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{
-          fontFamily: "Montserrat, sans-serif",
-          fontWeight: 600,
-          fontSize: "16px",
-          lineHeight: "22px",
-          color: "#FFFFFF",
-          padding: "8px 0",
-          borderBottom: "1px solid #333"
-        }}
-      >
+      <Typography sx={bodyText}>Inscription ID {data?.id}</Typography>
+      <Typography sx={bodyText}>Owner Address {data?.address}</Typography>
+      <Typography variant="h6" gutterBottom sx={sectionHeading}>
         Attributes
       </Typography>
       <List>
